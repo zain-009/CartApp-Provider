@@ -14,14 +14,11 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  ProductsList productsList = ProductsList();
-
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery
-        .of(context)
-        .size;
     final cartProvider = Provider.of<CartProvider>(context);
+    ProductsList productsList = ProductsList();
+    var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple[300],
@@ -31,23 +28,32 @@ class _CartPageState extends State<CartPage> {
         ),
         centerTitle: true,
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.shopping_bag_outlined,
-                    size: size.width * 0.08,
-                  )),
-              Positioned(
-                  top: 5,
-                  left: 27,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.red,
-                    radius: size.width * 0.025,
-                    child: Text('0', style: TextStyle(color: Colors.white),),
-                  ))
-            ],
+          Consumer<CartProvider>(
+            builder: (BuildContext context, value, Widget? child) {
+              int count = cartProvider.cartItems.length;
+              return Stack(
+                children: [
+                  IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.shopping_bag_outlined,
+                        size: size.width * 0.08,
+                      )),
+                  Positioned(
+                    top: 5,
+                    left: 27,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.red,
+                      radius: size.width * 0.025,
+                      child: Text(
+                        count.toString(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -62,8 +68,7 @@ class _CartPageState extends State<CartPage> {
                   description: productsList.productDescription[index],
                   price: double.parse(productsList.productPrices[index]),
                 );
-                final isProductInCart = cartProvider.cartItems.contains(
-                    product);
+                int count = cartProvider.cartItems[product] ?? 0;
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -128,29 +133,43 @@ class _CartPageState extends State<CartPage> {
                               ],
                             ),
                           ),
-                          Stack(alignment: Alignment.centerRight, children: [
+                          Stack(alignment: Alignment.center, children: [
                             CircleAvatar(
                               backgroundColor: Colors.deepPurple[300],
                               radius: size.width * 0.09 / 2,
                             ),
                             Consumer(
-                              builder: (BuildContext context, value,
-                                  Widget? child) {
-                                return Positioned(
-                                  left: -8,
-                                  child: IconButton(
-                                    iconSize: size.width * 0.09,
-                                    color: Colors.white,
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      Icons.add,
-                                      size: size.width * 0.09 / 1.1,
-                                    ),
+                              builder:
+                                  (BuildContext context, value, Widget? child) {
+                                return IconButton(
+                                  iconSize: size.width * 0.09,
+                                  color: Colors.white,
+                                  onPressed: () {
+                                    cartProvider.addToCart(product);
+                                  },
+                                  icon: Icon(
+                                    Icons.add,
+                                    size: size.width * 0.09 / 1.1,
                                   ),
                                 );
                               },
-                            )
-                          ])
+                            ),
+                            count > 0 ?
+                            Positioned(
+                              left: 28,
+                                top: 28,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.red[800],
+                                  radius: 8,
+                                  child: Text(
+                              count.toString(),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                              ),
+                            ),
+                                )) : Container(),
+                          ]),
                         ],
                       ),
                     ),
